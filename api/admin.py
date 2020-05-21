@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import User, Post
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'status')
+
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('user', 'title', 'text')

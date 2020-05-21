@@ -6,6 +6,8 @@ class User(models.Model):
     status = models.CharField(max_length=100)
     profile_photo = models.CharField(max_length=100)
 
+    register_date = models.DateField(auto_now=True)
+
     def __str__(self):
         return f'@{self.username}, status: {self.status}'
 
@@ -13,7 +15,7 @@ class User(models.Model):
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
-    title = models.CharField(max_length=30, verbose_name='Post title')
+    title = models.CharField(max_length=30, default='', verbose_name='Post title')
     text = models.TextField(verbose_name='Post text')
 
     pub_date = models.DateTimeField(verbose_name='Post published', auto_now=True)
