@@ -13,3 +13,11 @@ class UserViewSet(viewsets.ModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('user')
     serializer_class = PostSerializer
+
+    def get_queryset(self):
+        queryset = Post.objects.all()
+        username = self.request.query_params.get('user', None)
+
+        if username is not None:
+            queryset = queryset.filter(user__name=username)
+        return queryset
