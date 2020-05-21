@@ -5,9 +5,9 @@ from .models import User, Post
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('name', 'status')
+    list_display = ('username', 'status', 'date_joined')
 
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('user', 'title', 'text')
+    list_display = ('author', 'title', 'text')

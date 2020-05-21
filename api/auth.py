@@ -5,4 +5,5 @@ from rest_framework import exceptions
 
 class ExampleAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-        raise exceptions.AuthenticationFailed()
+        pass
+        # raise exceptions.AuthenticationFailed()
