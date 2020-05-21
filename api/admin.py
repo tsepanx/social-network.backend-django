@@ -5,7 +5,7 @@ from .models import User, Post
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'status')
+    list_display = ('name', 'status')
 
 
 @admin.register(Post)

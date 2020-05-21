@@ -6,7 +6,7 @@ from .models import User, Post
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('username')
+    queryset = User.objects.all().order_by('name')
     serializer_class = UserSerializer
 
 
