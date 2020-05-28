@@ -15,6 +15,21 @@ class Profile(models.Model):
         return f'{self.user.username}, {self.status}'
 
 
+class UserManager(models.Manager):
+    @staticmethod
+    def create(username, password):
+        user = User(username=username)
+
+        if password is not None:
+            user.set_password(password)
+
+        user.save()
+
+        profile = Profile(user=user)
+        profile.save()
+        return user
+
+
 class Post(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
 

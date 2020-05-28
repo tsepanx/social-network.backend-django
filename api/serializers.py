@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import User
 
-from api.models import Post, Profile
+from api.models import Post, Profile, UserManager
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -30,18 +30,13 @@ class UserSerializerWithToken(serializers.ModelSerializer):
         return token
 
     def create(self, validated_data):
+        username = validated_data.pop('username', None)
         password = validated_data.pop('password', None)
 
-        instance = self.Meta.model(**validated_data)
-
-        if password is not None:
-            instance.set_password(password)
-
-        instance.save()
-
-        Profile.objects.create(user=instance)
-
-        return instance
+        return UserManager.create(
+            username=username,
+            password=password
+        )
 
     class Meta:
         model = User
