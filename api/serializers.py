@@ -5,16 +5,16 @@ from django.contrib.auth.models import User
 from api.models import Post, Profile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username',)
 
 
-class PostSerializer(serializers.HyperlinkedModelSerializer):
+class UserCredentialsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Post
-        fields = ('id', 'title', 'text', 'pub_date')
+        model = User
+        fields = ('username',)
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -39,11 +39,25 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 
         instance.save()
 
-        profile = Profile(user=instance)
-        profile.save()
+        Profile.objects.create(user=instance)
 
         return instance
 
     class Meta:
         model = User
         fields = ('token', 'username', 'password')
+
+
+class PostSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('id', 'author', 'title', 'text', 'pub_date')
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserCredentialsSerializer()
+    posts = PostSerializer(many=True)
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'user', 'posts', 'status')

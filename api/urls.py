@@ -6,6 +6,8 @@ from .router import DefaultRouterWithSimpleViews
 
 router = DefaultRouterWithSimpleViews()
 router.register(r'posts', views.PostViewSet)
+router.register(r'profile', views.ProfileViewSet)
+
 router.register(r'users', views.UserList, 'users')
 router.register(r'me', views.Me, 'me')
 
