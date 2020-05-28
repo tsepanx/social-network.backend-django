@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.CharField(max_length=100, blank=True)
@@ -16,7 +16,7 @@ class Profile(models.Model):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(Profile, on_delete=models.DO_NOTHING)
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=30, default='', verbose_name='Post title')
     text = models.TextField(default='', verbose_name='Post text')
