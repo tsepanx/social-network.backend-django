@@ -8,13 +8,7 @@ from api.models import Post, Profile, UserManager
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username',)
-
-
-class UserCredentialsSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username',)
+        fields = ('id', 'username')  # TODO 'url' field to be able to DELETE User
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -46,13 +40,13 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Post
-        fields = ('id', 'author', 'title', 'text', 'pub_date')
+        fields = ('id', 'url', 'author', 'title', 'text', 'pub_date')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserCredentialsSerializer()
+    user = UserSerializer()
     posts = PostSerializer(many=True)
 
     class Meta:
         model = Profile
-        fields = ('id', 'user', 'posts', 'status')
+        exclude = ('id',)
