@@ -23,18 +23,12 @@ class Me(APIView):
         return Response(serializer.data)
 
 
-class UserList(APIView):
+class SignUp(APIView):
     """
-    Create a new user, or list existing users.
+    Create a new user.
     """
 
     permission_classes = (permissions.AllowAny,)
-
-    @staticmethod
-    def get(request):
-        queryset = User.objects.all()
-        serializer = UserSerializer(queryset, many=True)
-        return Response(serializer.data)
 
     @staticmethod
     def post(request):
@@ -55,9 +49,9 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        username = self.request.query_params.get('user', None)
+        profile_id = self.request.query_params.get('user', None)
 
-        if username is not None:
-            return self.queryset.filter(author__user__id=username)
+        if profile_id is not None:
+            return self.queryset.filter(author_id=profile_id)
 
         return self.queryset
