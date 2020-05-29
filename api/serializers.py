@@ -46,12 +46,11 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Post
-        fields = ('id', 'url', 'author', 'title', 'text', 'pub_date')
+        fields = '__all__'
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserGETSerializer()
-    # posts = PostSerializer(many=True)
+    user = UserGETSerializer(read_only=True)
 
     class Meta:
         model = Profile

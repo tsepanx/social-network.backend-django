@@ -13,3 +13,16 @@ def my_jwt_response_handler(token, user=None, request=None):
 class Nobody(permissions.BasePermission):
     def has_permission(self, request, view):
         return False
+
+
+class ProfileAuthenticated(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, profile):
+        profile_user = profile.user
+
+        if not request.user:
+            return False
+
+        return profile_user == request.user or request.user.is_staff

@@ -8,7 +8,7 @@ from .router import DefaultRouterWithSimpleViews
 router = DefaultRouterWithSimpleViews()
 router.register(r'post', views.PostViewSet)
 router.register(r'profile', views.ProfileViewSet)
-router.register(r'users', views.UserViewSet)
+router.register(r'user', views.UserViewSet)
 router.register(r'me', views.Me, 'me')
 
 urlpatterns = [

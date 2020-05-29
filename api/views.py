@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .models import Post, Profile
 from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, \
     PostSerializer, ProfileSerializer
-from .utils import Nobody
+from .utils import Nobody, ProfileAuthenticated
 
 DEFAULT_PERMISSION = (permissions.IsAuthenticatedOrReadOnly,)
 
@@ -20,8 +20,14 @@ USER_METHODS_PERMISSIONS = {
     'create': (permissions.AllowAny,)
 }
 
+PROFILE_METHOD_SERIALIZERS = {
+    'list': ProfileSerializer,
+    'update': ProfileSerializer
+}
+
 PROFILE_METHODS_PERMISSIONS = {
-    'create': (Nobody,)
+    'create': (Nobody,),
+    'update': (ProfileAuthenticated,)
 }
 
 
@@ -56,6 +62,11 @@ class UserViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    def get_serializer_class(self):
+        default_serializer = PROFILE_METHOD_SERIALIZERS.get('list')
+
+        return PROFILE_METHOD_SERIALIZERS.get(self.action, default_serializer)
 
     def get_permissions(self):
         permission_classes = PROFILE_METHODS_PERMISSIONS.get(self.action, DEFAULT_PERMISSION)
