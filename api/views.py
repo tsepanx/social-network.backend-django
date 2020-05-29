@@ -1,11 +1,23 @@
 from django.contrib.auth.models import User
 from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Post, Profile
-from .serializers import UserSerializer, UserSerializerWithToken, PostSerializer, ProfileSerializer
+from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, PostSerializer, \
+    ProfileSerializer
+
+DEFAULT_PERMISSION = (permissions.IsAuthenticated,)
+
+USER_METHODS_SERIALIZERS = {
+    'list': UserGETSerializer,
+    'update': UserPUTSerializer,
+    'create': UserSerializerWithToken
+}
+
+USER_METHODS_PERMISSIONS = {
+    'create': (permissions.AllowAny,)
+}
 
 
 class Me(APIView):
@@ -19,19 +31,31 @@ class Me(APIView):
         Determine the current user by their token, and return their data
         """
 
-        serializer = UserSerializer(request.user)
+        serializer = UserGETSerializer(request.user)
         return Response(serializer.data)
 
 
-class SignUp(APIView):
-    """
-    Create a new user.
-    """
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserGETSerializer
 
-    permission_classes = (permissions.AllowAny,)
+    def get_permissions(self):
+        permission_classes = USER_METHODS_PERMISSIONS.get(self.action, DEFAULT_PERMISSION)
 
-    @staticmethod
-    def post(request):
+        return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        return USER_METHODS_SERIALIZERS.get(self.action, USER_METHODS_SERIALIZERS['list'])
+
+    def update(self, request, *args, **kwargs):
+        user_id = kwargs.pop('pk', None)
+        password = request.data.get('password', None)
+
+        if None not in [user_id, password]:
+            user = User.objects.get(pk=user_id)
+            user.set_password(password)
+
+    def create(self, request, *args, **kwargs):
         serializer = UserSerializerWithToken(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -52,6 +76,6 @@ class PostViewSet(viewsets.ModelViewSet):
         profile_id = self.request.query_params.get('user', None)
 
         if profile_id is not None:
-            return self.queryset.filter(author_id=profile_id)
+            return self.queryset.filter(author_id=profile_id).order_by('-pub_date')
 
         return self.queryset

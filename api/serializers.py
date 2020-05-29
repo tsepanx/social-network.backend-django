@@ -5,10 +5,16 @@ from django.contrib.auth.models import User
 from api.models import Post, Profile, UserManager
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserGETSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username')  # TODO 'url' field to be able to DELETE User
+        fields = ('id', 'username')
+
+
+class UserPUTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'password')
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -44,9 +50,9 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    posts = PostSerializer(many=True)
+    user = UserGETSerializer()
+    # posts = PostSerializer(many=True)
 
     class Meta:
         model = Profile
-        exclude = ('id',)
+        exclude = ()  # ('id',)

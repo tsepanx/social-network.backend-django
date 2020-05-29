@@ -29,6 +29,10 @@ class UserManager(models.Manager):
         profile.save()
         return user
 
+    @staticmethod
+    def delete(profile_id):
+        pass  # TODO
+
 
 class Post(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
