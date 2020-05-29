@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -65,13 +65,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if None not in [user_id, password]:
             user = User.objects.get(pk=user_id)
             user.set_password(password)
-
-    def create(self, request, *args, **kwargs):
-        serializer = UserSerializerWithToken(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
