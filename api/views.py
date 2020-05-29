@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Post, Profile
-from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, PostSerializer, \
-    ProfileSerializer
+from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, \
+    PostSerializer, ProfileSerializer
+from .utils import Nobody
 
-DEFAULT_PERMISSION = (permissions.IsAuthenticated,)
+DEFAULT_PERMISSION = (permissions.IsAuthenticatedOrReadOnly,)
 
 USER_METHODS_SERIALIZERS = {
     'list': UserGETSerializer,
@@ -19,20 +20,9 @@ USER_METHODS_PERMISSIONS = {
     'create': (permissions.AllowAny,)
 }
 
-
-class Me(APIView):
-    """
-    Current logged in user
-    """
-
-    @staticmethod
-    def get(request):
-        """
-        Determine the current user by their token, and return their data
-        """
-
-        serializer = UserGETSerializer(request.user)
-        return Response(serializer.data)
+PROFILE_METHODS_PERMISSIONS = {
+    'create': (Nobody,)
+}
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -67,6 +57,11 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+    def get_permissions(self):
+        permission_classes = PROFILE_METHODS_PERMISSIONS.get(self.action, DEFAULT_PERMISSION)
+
+        return [permission() for permission in permission_classes]
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('author_id')
@@ -79,3 +74,18 @@ class PostViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(author_id=profile_id).order_by('-pub_date')
 
         return self.queryset
+
+
+class Me(APIView):
+    """
+    Current logged in user
+    """
+
+    @staticmethod
+    def get(request):
+        """
+        Determine the current user by their token, and return their data
+        """
+
+        serializer = UserGETSerializer(request.user)
+        return Response(serializer.data)
