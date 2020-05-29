@@ -30,18 +30,33 @@ PROFILE_METHODS_PERMISSIONS = {
     'update': (ProfileAuthenticated,)
 }
 
+POST_METHODS_PERMISSIONS = {
+    'create': (ProfileAuthenticated,),
+    'update': (ProfileAuthenticated,),
+}
+
+
+def get_permissions_by_map(mapping, action):
+    permission_classes = mapping.get(action, DEFAULT_PERMISSION)
+
+    return [permission() for permission in permission_classes]
+
+
+def get_serializer_by_map(mapping, action):
+    default_serializer = mapping.get('list')
+
+    return mapping.get(action, default_serializer)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserGETSerializer
 
     def get_permissions(self):
-        permission_classes = USER_METHODS_PERMISSIONS.get(self.action, DEFAULT_PERMISSION)
-
-        return [permission() for permission in permission_classes]
+        return get_permissions_by_map(USER_METHODS_PERMISSIONS, self.action)
 
     def get_serializer_class(self):
-        return USER_METHODS_SERIALIZERS.get(self.action, USER_METHODS_SERIALIZERS['list'])
+        return get_serializer_by_map(USER_METHODS_SERIALIZERS, self.action)
 
     def update(self, request, *args, **kwargs):
         user_id = kwargs.pop('pk', None)
@@ -64,19 +79,18 @@ class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
 
     def get_serializer_class(self):
-        default_serializer = PROFILE_METHOD_SERIALIZERS.get('list')
-
-        return PROFILE_METHOD_SERIALIZERS.get(self.action, default_serializer)
+        return get_serializer_by_map(PROFILE_METHOD_SERIALIZERS, self.action)
 
     def get_permissions(self):
-        permission_classes = PROFILE_METHODS_PERMISSIONS.get(self.action, DEFAULT_PERMISSION)
-
-        return [permission() for permission in permission_classes]
+        return get_permissions_by_map(PROFILE_METHODS_PERMISSIONS, self.action)
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('author_id')
     serializer_class = PostSerializer
+
+    def get_permissions(self):
+        return get_permissions_by_map(POST_METHODS_PERMISSIONS, self.action)
 
     def get_queryset(self):
         profile_id = self.request.query_params.get('user', None)
