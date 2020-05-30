@@ -1,12 +1,12 @@
-from rest_framework import permissions
+from rest_framework import permissions, authentication
 
-from .serializers import UserGETSerializer
+from . import serializers
 
 
 def my_jwt_response_handler(token, user=None, request=None):
     return {
         'token': token,
-        'user': UserGETSerializer(user, context={'request': request}).data
+        'user': serializers.user.GETSerializer(user, context={'request': request}).data
     }
 
 
@@ -29,3 +29,9 @@ def user_auth(user_field):
             return profile_user == request.user or request.user.is_staff
 
     return ProfileAuthenticated
+
+
+class ExampleAuthentication(authentication.BaseAuthentication):
+    def authenticate(self, request):
+        pass
+        # raise exceptions.AuthenticationFailed()
