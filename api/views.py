@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from .models import Post, Profile
 from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, \
-    PostSerializer, ProfileSerializer
+    PostSerializer, ProfileSerializer, ProfileWithPostsSerializer
 from .utils import Nobody, user_auth
 
 ProfileAuthenticated = user_auth('user')
@@ -25,6 +25,7 @@ USER_METHODS_PERMISSIONS = {
 
 PROFILE_METHOD_SERIALIZERS = {
     'list': ProfileSerializer,
+    'retrieve': ProfileWithPostsSerializer,
     'update': ProfileSerializer
 }
 
@@ -83,6 +84,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
 
     def get_serializer_class(self):
+        print()
         return get_serializer_by_map(PROFILE_METHOD_SERIALIZERS, self.action)
 
     def get_permissions(self):
