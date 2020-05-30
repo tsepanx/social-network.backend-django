@@ -25,7 +25,7 @@ class UserManager(models.Manager):
 
         user.save()
 
-        profile = Profile(user=user)
+        profile = Profile(id=user.id, user=user)
         profile.save()
         return user
 
