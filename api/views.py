@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 from .models import Post, Profile
 from .serializers import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken, \
     PostSerializer, ProfileSerializer
-from .utils import Nobody, ProfileAuthenticated
+from .utils import Nobody, user_auth
+
+ProfileAuthenticated = user_auth('user')
+PostAuthenticated = user_auth('author')
 
 DEFAULT_PERMISSION = (permissions.IsAuthenticatedOrReadOnly,)
 
@@ -31,8 +34,8 @@ PROFILE_METHODS_PERMISSIONS = {
 }
 
 POST_METHODS_PERMISSIONS = {
-    'create': (ProfileAuthenticated,),
-    'update': (ProfileAuthenticated,),
+    'create': (PostAuthenticated,),
+    'update': (PostAuthenticated,),
 }
 
 
@@ -60,11 +63,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         user_id = kwargs.pop('pk', None)
+
+        username = request.data.get('username', None)
         password = request.data.get('password', None)
 
-        if None not in [user_id, password]:
+        if user_id:
             user = User.objects.get(pk=user_id)
-            user.set_password(password)
+
+            if password:
+                user.set_password(password)
+            if username:
+                user.username = username
+
+            user.save()
 
 
 class ProfileViewSet(viewsets.ModelViewSet):

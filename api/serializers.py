@@ -12,9 +12,17 @@ class UserGETSerializer(serializers.ModelSerializer):
 
 
 class UserPUTSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ('id', 'password')
+        fields = ('id', 'username', 'password')
+
+
+class ProfileUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username',)
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -50,7 +58,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserGETSerializer(read_only=True)
+    user = ProfileUserSerializer(read_only=True)
 
     class Meta:
         model = Profile
