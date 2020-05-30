@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
+import datetime
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -73,7 +73,10 @@ REST_FRAMEWORK = {
 
 
 JWT_AUTH = {
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler'
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler',
+
+    # how long the original token is valid for
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
 }
 
 
