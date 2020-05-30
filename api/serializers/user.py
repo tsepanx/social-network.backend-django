@@ -2,16 +2,16 @@ from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth.models import User
 
-from api.models import Post, Profile, UserManager
+from api.models import UserManager
 
 
-class UserGETSerializer(serializers.ModelSerializer):
+class GETSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username')
 
 
-class UserPUTSerializer(serializers.ModelSerializer):
+class PUTSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -25,7 +25,7 @@ class ProfileUserSerializer(serializers.ModelSerializer):
         fields = ('username',)
 
 
-class UserSerializerWithToken(serializers.ModelSerializer):
+class WithTokenSerializer(serializers.ModelSerializer):
     token = serializers.SerializerMethodField()
     password = serializers.CharField(write_only=True)
 
@@ -51,19 +51,8 @@ class UserSerializerWithToken(serializers.ModelSerializer):
         fields = ('token', 'username', 'password')
 
 
-class PostSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Post
-        fields = '__all__'
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    user = ProfileUserSerializer(read_only=True)
-
-    class Meta:
-        model = Profile
-        exclude = ()  # ('id',)
-
-
-class ProfileWithPostsSerializer(ProfileSerializer):
-    posts = PostSerializer(many=True)
+METHODS_SERIALIZERS = {
+    'list': GETSerializer,
+    'update': PUTSerializer,
+    'create': WithTokenSerializer
+}

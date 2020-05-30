@@ -67,7 +67,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
 
-        'api.auth.ExampleAuthentication'
+        'api.utils.ExampleAuthentication'
     ),
 }
 
@@ -76,7 +76,10 @@ JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler',
 
     # how long the original token is valid for
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+
+    # allow refreshing of tokens
+    'JWT_ALLOW_REFRESH': True,
 }
 
 
