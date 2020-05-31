@@ -38,7 +38,7 @@ def get_permissions_by_map(mapping, action):
 
 
 def get_serializer_by_map(mapping, action):
-    default_serializer = mapping.get('list')
+    default_serializer = mapping.get('list', DEFAULT_PERMISSION)
 
     return mapping.get(action, default_serializer)
 
@@ -60,14 +60,16 @@ class UserViewSet(viewsets.ModelViewSet):
         password = request.data.get('password', None)
 
         if user_id:
-            user = User.objects.get(pk=user_id)
+            db_user = User.objects.get(pk=user_id)
 
             if password:
-                user.set_password(password)
+                db_user.set_password(password)
             if username:
-                user.username = username
-
-            user.save()
+                db_user.username = username
+            try:
+                db_user.save()
+            except AssertionError as e:
+                print(e)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
