@@ -59,6 +59,11 @@ class UserViewSet(viewsets.ModelViewSet):
         username = request.data.get('username', None)
         password = request.data.get('password', None)
 
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=False)
+
         if user_id:
             db_user = User.objects.get(pk=user_id)
 
@@ -66,10 +71,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 db_user.set_password(password)
             if username:
                 db_user.username = username
-            try:
-                db_user.save()
-            except AssertionError as e:
-                print(e)
+
+            db_user.save()
+
+        return Response(serializer.data)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
