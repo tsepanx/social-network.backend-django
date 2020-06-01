@@ -8,9 +8,6 @@ class Profile(models.Model):
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.CharField(max_length=100, blank=True)
 
-    def posts(self):
-        return Post.objects.all().filter(author=self)
-
     def __str__(self):
         return f'{self.user.username}, {self.status}'
 
@@ -35,7 +32,7 @@ class UserManager(models.Manager):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    author = models.ForeignKey(Profile, related_name='posts', on_delete=models.CASCADE)
 
     title = models.CharField(max_length=30, default='', verbose_name='Post title')
     text = models.TextField(default='', verbose_name='Post text')
@@ -44,3 +41,11 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.title}, @{self.author.user.username}'
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='messages_sent')
+    receiver = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, related_name='messages_received')
+
+    text = models.TextField(verbose_name='Message text')
+    created = models.DateTimeField(auto_now_add=True)
