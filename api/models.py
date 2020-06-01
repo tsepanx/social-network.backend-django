@@ -8,8 +8,28 @@ class Profile(models.Model):
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.CharField(max_length=100, blank=True)
 
+    relationships = models.ManyToManyField('self', through='Relationship', symmetrical=False,
+                                           related_name='related_to')
+
+    def add_relationship(self, person):
+        relationship, created = Relationship.objects.get_or_create(
+            from_person=self,
+            to_person=person)
+        return relationship
+
+    def remove_relationship(self, person):
+        Relationship.objects.filter(
+            from_person=self,
+            to_person=person).delete()
+        return
+
     def __str__(self):
         return f'{self.user.username}, {self.status}'
+
+
+class Relationship(models.Model):
+    from_person = models.ForeignKey(Profile, related_name='from_people', on_delete=models.CASCADE)
+    to_person = models.ForeignKey(Profile, related_name='to_people', on_delete=models.DO_NOTHING)
 
 
 class UserManager(models.Manager):
