@@ -15,21 +15,20 @@ class Nobody(permissions.BasePermission):
         return False
 
 
-def user_auth(user_field):
+def user_auth(user_field=None):
     class ModelAuthenticated(permissions.BasePermission):
         def has_permission(self, request, view):
             return True
 
         def has_object_permission(self, request, view, obj):
-            owner_instance = obj.__getattribute__(user_field)
+            owner_instance = obj.__getattribute__(user_field) if user_field else obj
 
             if not request.user:
                 return False
 
-            same_username = owner_instance.username == request.user.username
-            is_staff = request.user.is_staff
+            same_pk = owner_instance.pk == request.user.pk
 
-            return same_username or is_staff
+            return same_pk
 
     return ModelAuthenticated
 
