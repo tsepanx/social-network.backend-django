@@ -8,28 +8,43 @@ class Profile(models.Model):
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.CharField(max_length=100, blank=True)
 
-    relationships = models.ManyToManyField('self', through='Relationship', symmetrical=False,
+    relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
 
-    def add_relationship(self, person):
+    def add_relationship(self, person, symmetrical=True):
         relationship, created = Relationship.objects.get_or_create(
             from_person=self,
             to_person=person)
+
+        if symmetrical:
+            person.add_relationship(self, False)
+
         return relationship
 
-    def remove_relationship(self, person):
+    def remove_relationship(self, person, symmetrical=True):
         Relationship.objects.filter(
             from_person=self,
             to_person=person).delete()
-        return
+
+        if symmetrical:
+            person.remove_relationship(self, False)
+
+    def get_friends(self):
+        return self.relationships.filter(following__to_person=self)
+
+    def get_followers(self):
+        return [relationship.from_person for relationship in self.followers.all()]
 
     def __str__(self):
-        return f'{self.user.username}, {self.status}'
+        return str(self.user)
 
 
 class Relationship(models.Model):
-    from_person = models.ForeignKey(Profile, related_name='from_people', on_delete=models.CASCADE)
-    to_person = models.ForeignKey(Profile, related_name='to_people', on_delete=models.DO_NOTHING)
+    from_person = models.ForeignKey(Profile, related_name='following', on_delete=models.CASCADE)
+    to_person = models.ForeignKey(Profile, related_name='followers', on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return f'|{self.from_person.user}| -> |{self.to_person.user}|'
 
 
 class UserManager(models.Manager):
