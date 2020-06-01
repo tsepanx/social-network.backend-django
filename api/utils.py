@@ -15,6 +15,11 @@ class Nobody(permissions.BasePermission):
         return False
 
 
+class IsAdmin(permissions.IsAdminUser):
+    def has_object_permission(self, request, view, obj):
+        return super().has_permission(request, view)
+
+
 def user_auth(user_field=None):
     class ModelAuthenticated(permissions.BasePermission):
         def has_permission(self, request, view):
@@ -27,10 +32,11 @@ def user_auth(user_field=None):
                 return False
 
             same_pk = owner_instance.pk == request.user.pk
+            print(same_pk)
 
             return same_pk
 
-    return ModelAuthenticated
+    return ModelAuthenticated()
 
 
 class ExampleAuthentication(authentication.BaseAuthentication):

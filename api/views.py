@@ -5,19 +5,19 @@ from rest_framework.views import APIView
 
 from .models import Post, UserProfile
 from .serializers import user, profile, post
-from .utils import Nobody, user_auth
+from . import utils
 
 DEFAULT_PERMISSION = permissions.IsAuthenticatedOrReadOnly()
 
 ALLOW_ANY = permissions.AllowAny()
-IS_ADMIN = permissions.IsAdminUser()
-NOBODY = Nobody()
+IS_ADMIN = utils.IsAdmin()
+NOBODY = utils.Nobody()
 
 
 class ModelAuthenticated:
-    USER = user_auth(None)()
-    PROFILE = user_auth('person__user')()
-    POST = user_auth('author__person__user')()
+    USER = utils.user_auth(None)
+    PROFILE = utils.user_auth('person__user')
+    POST = utils.user_auth('author__person__user')
 
 
 USER_METHODS_PERMISSIONS = {
@@ -27,12 +27,12 @@ USER_METHODS_PERMISSIONS = {
 
 PROFILE_METHODS_PERMISSIONS = {
     'create': [NOBODY],
-    'update': (ModelAuthenticated.PROFILE,)
+    'update': [ModelAuthenticated.PROFILE]
 }
 
 POST_METHODS_PERMISSIONS = {
-    'create': (ModelAuthenticated.POST,),
-    'update': (ModelAuthenticated.POST,),
+    'create': [ModelAuthenticated.POST],
+    'update': [ModelAuthenticated.POST],
 }
 
 
