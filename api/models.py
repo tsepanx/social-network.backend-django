@@ -63,7 +63,7 @@ class Person(models.Model):
         return self.user.__str__()
 
 
-class PersonManager(models.Manager):
+class UserManager(models.Manager):
     @staticmethod
     def create(username, password):
         user = User(username=username)
@@ -86,8 +86,14 @@ class PersonManager(models.Manager):
         return user
 
     @staticmethod
-    def delete(profile_id):
-        pass  # TODO
+    def delete(pk):
+        to_delete = Person.objects.get(pk=pk)
+
+        to_delete.user.delete()
+        to_delete.social_user.delete()
+        to_delete.profile.delete()
+
+        Person.delete(to_delete)
 
 
 class Post(models.Model):

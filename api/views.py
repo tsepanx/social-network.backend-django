@@ -3,8 +3,8 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Post, UserProfile
-from .serializers import user, profile, post
+from .models import Post, UserProfile, SocialUser, UserManager
+from .serializers import user, profile, post, social_user
 from . import utils
 
 DEFAULT_PERMISSION = permissions.IsAuthenticatedOrReadOnly()
@@ -43,7 +43,7 @@ def get_permissions_by_map(mapping, action):
 
 
 def get_serializer_by_map(mapping, action):
-    default_serializer = mapping.get('list', None)
+    default_serializer = mapping.get('list')
 
     return mapping.get(action, default_serializer)
 
@@ -81,6 +81,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def destroy(self, request, *args, **kwargs):
+        UserManager.delete(kwargs.get('pk'))
+
+        return Response()
+
+
 
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
@@ -91,6 +97,11 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         return get_permissions_by_map(PROFILE_METHODS_PERMISSIONS, self.action)
+
+
+class SocialUserViewSet(viewsets.ModelViewSet):
+    queryset = SocialUser.objects.all()
+    serializer_class = social_user.SocialUserSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):

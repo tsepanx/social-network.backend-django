@@ -8,8 +8,9 @@ router = DefaultRouterWithSimpleViews()
 router.register(r'post', views.PostViewSet)
 router.register(r'profile', views.ProfileViewSet)
 router.register(r'user', views.UserViewSet)
+router.register(r'social', views.SocialUserViewSet)
+
 router.register(r'me', views.Me, 'me')
-# router.register(r'people', )
 
 urlpatterns = [
     path('', include(router.urls)),
