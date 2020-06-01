@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from api.models import Profile
+from api.models import UserProfile
 from . import user, post
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = user.ProfileUserSerializer(read_only=True)
+    user = user.UserProfileSerializer(read_only=True)
 
     class Meta:
-        model = Profile
+        model = UserProfile
         exclude = ()  # ('id',)
 
 

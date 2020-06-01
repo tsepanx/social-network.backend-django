@@ -71,7 +71,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-
 JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler',
 
@@ -81,7 +80,6 @@ JWT_AUTH = {
     # allow refreshing of tokens
     'JWT_ALLOW_REFRESH': True,
 }
-
 
 CORS_ORIGIN_ALLOW_ALL = False
 

@@ -1,8 +1,8 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
-from django.contrib.auth.models import User
 
-from api.models import UserManager
+from api.models import PersonManager
 
 
 class GETSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class PUTSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password')
 
 
-class ProfileUserSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username',)
@@ -41,7 +41,7 @@ class WithTokenSerializer(serializers.ModelSerializer):
         username = validated_data.pop('username', None)
         password = validated_data.pop('password', None)
 
-        return UserManager.create(
+        return PersonManager.create(
             username=username,
             password=password
         )

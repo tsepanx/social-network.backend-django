@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from .models import Post, Profile
+from .models import Post, UserProfile
 
 
-@admin.register(Profile)
+@admin.register(UserProfile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'status')
+    list_display = ('profile_photo', 'status')
 
 
 @admin.register(Post)

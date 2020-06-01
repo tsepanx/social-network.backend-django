@@ -3,13 +3,12 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Post, Profile
+from .models import Post, UserProfile
 from .serializers import user, profile, post
-
 from .utils import Nobody, user_auth
 
-ProfileAuthenticated = user_auth('user')
-PostAuthenticated = user_auth('author')
+ProfileAuthenticated = user_auth('person__user')
+PostAuthenticated = user_auth('author__person__user')
 
 DEFAULT_PERMISSION = (permissions.IsAuthenticatedOrReadOnly,)
 
@@ -75,7 +74,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+    queryset = UserProfile.objects.all()
     serializer_class = profile.ProfileSerializer
 
     def get_serializer_class(self):

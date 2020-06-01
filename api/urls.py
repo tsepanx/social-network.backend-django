@@ -9,6 +9,7 @@ router.register(r'post', views.PostViewSet)
 router.register(r'profile', views.ProfileViewSet)
 router.register(r'user', views.UserViewSet)
 router.register(r'me', views.Me, 'me')
+# router.register(r'people', )
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -17,4 +18,3 @@ urlpatterns = [
 
     path('rest-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
-
