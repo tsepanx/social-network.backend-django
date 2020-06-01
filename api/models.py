@@ -55,7 +55,7 @@ class Person(models.Model):
     ON_DELETE = models.PROTECT
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+
     profile = models.OneToOneField(UserProfile, on_delete=ON_DELETE, related_name=RELATED_NAME)
     social_user = models.OneToOneField(SocialUser, on_delete=ON_DELETE, related_name=RELATED_NAME)
 

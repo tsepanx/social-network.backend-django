@@ -7,34 +7,43 @@ from .models import Post, UserProfile
 from .serializers import user, profile, post
 from .utils import Nobody, user_auth
 
-ProfileAuthenticated = user_auth('person__user')
-PostAuthenticated = user_auth('author__person__user')
+DEFAULT_PERMISSION = permissions.IsAuthenticatedOrReadOnly()
 
-DEFAULT_PERMISSION = (permissions.IsAuthenticatedOrReadOnly,)
+ALLOW_ANY = permissions.AllowAny()
+IS_ADMIN = permissions.IsAdminUser()
+NOBODY = Nobody()
+
+
+class ModelAuthenticated:
+    USER = user_auth(None)()
+    PROFILE = user_auth('person__user')()
+    POST = user_auth('author__person__user')()
+
 
 USER_METHODS_PERMISSIONS = {
-    'create': (permissions.AllowAny,)
+    'create': [ALLOW_ANY],
+    'destroy': [permissions.OR(ModelAuthenticated.USER, IS_ADMIN)]
 }
 
 PROFILE_METHODS_PERMISSIONS = {
-    'create': (Nobody,),
-    'update': (ProfileAuthenticated,)
+    'create': [NOBODY],
+    'update': (ModelAuthenticated.PROFILE,)
 }
 
 POST_METHODS_PERMISSIONS = {
-    'create': (PostAuthenticated,),
-    'update': (PostAuthenticated,),
+    'create': (ModelAuthenticated.POST,),
+    'update': (ModelAuthenticated.POST,),
 }
 
 
 def get_permissions_by_map(mapping, action):
-    permission_classes = mapping.get(action, DEFAULT_PERMISSION)
+    res = mapping.get(action, [DEFAULT_PERMISSION])
 
-    return [permission() for permission in permission_classes]
+    return res
 
 
 def get_serializer_by_map(mapping, action):
-    default_serializer = mapping.get('list', DEFAULT_PERMISSION)
+    default_serializer = mapping.get('list', None)
 
     return mapping.get(action, default_serializer)
 
