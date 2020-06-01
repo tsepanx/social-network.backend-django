@@ -2,12 +2,15 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
+class UserProfile(models.Model):
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.person.__str__()
+
+
+class SocialUser(models.Model):
     relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
 
@@ -33,21 +36,34 @@ class Profile(models.Model):
         return self.relationships.filter(following__to_person=self)
 
     def get_followers(self):
-        return [relationship.from_person for relationship in self.followers.all()]
+        return [relationship.from_user for relationship in self.followers.all()]
 
     def __str__(self):
-        return str(self.user)
+        return self.person.__str__()
 
 
 class Relationship(models.Model):
-    from_person = models.ForeignKey(Profile, related_name='following', on_delete=models.CASCADE)
-    to_person = models.ForeignKey(Profile, related_name='followers', on_delete=models.DO_NOTHING)
+    from_user = models.ForeignKey(SocialUser, related_name='following', on_delete=models.CASCADE, null=True)
+    to_user = models.ForeignKey(SocialUser, related_name='followers', on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
-        return f'|{self.from_person.user}| -> |{self.to_person.user}|'
+        return f'|{self.from_user.person}| -> |{self.to_user.person}|'
 
 
-class UserManager(models.Manager):
+class Person(models.Model):
+    RELATED_NAME = 'person'
+    ON_DELETE = models.PROTECT
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    profile = models.OneToOneField(UserProfile, on_delete=ON_DELETE, related_name=RELATED_NAME)
+    social_user = models.OneToOneField(SocialUser, on_delete=ON_DELETE, related_name=RELATED_NAME)
+
+    def __str__(self):
+        return self.user.__str__()
+
+
+class PersonManager(models.Manager):
     @staticmethod
     def create(username, password):
         user = User(username=username)
@@ -57,8 +73,16 @@ class UserManager(models.Manager):
 
         user.save()
 
-        profile = Profile(id=user.id, user=user)
-        profile.save()
+        user_profile = UserProfile.objects.create(id=user.id)
+        social_user = SocialUser.objects.create(id=user.id)
+
+        Person.objects.create(
+            id=user.id,
+            user=user,
+            profile=user_profile,
+            social_user=social_user
+        )
+
         return user
 
     @staticmethod
@@ -67,7 +91,7 @@ class UserManager(models.Manager):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(Profile, related_name='posts', on_delete=models.CASCADE)
+    author = models.ForeignKey(UserProfile, related_name='posts', on_delete=models.CASCADE)
 
     title = models.CharField(max_length=30, default='', verbose_name='Post title')
     text = models.TextField(default='', verbose_name='Post text')
@@ -75,12 +99,12 @@ class Post(models.Model):
     pub_date = models.DateTimeField(verbose_name='Post published', auto_now=True)
 
     def __str__(self):
-        return f'{self.title}, @{self.author.user.username}'
+        return f'{self.title}, @{self.author}'
 
 
 class Message(models.Model):
-    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='messages_sent')
-    receiver = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, related_name='messages_received')
+    sender = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='messages_sent')
+    receiver = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='messages_received')
 
     text = models.TextField(verbose_name='Message text')
     created = models.DateTimeField(auto_now_add=True)
