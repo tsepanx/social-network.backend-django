@@ -6,9 +6,6 @@ from rest_framework.views import APIView
 from .models import Post, Profile
 from .serializers import user, profile, post
 
-# from .user import UserGETSerializer, UserPUTSerializer, UserSerializerWithToken
-# from .user.post import PostSerializer
-# from .user.profile import ProfileSerializer, ProfileWithPostsSerializer
 from .utils import Nobody, user_auth
 
 ProfileAuthenticated = user_auth('user')

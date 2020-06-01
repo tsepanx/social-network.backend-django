@@ -6,7 +6,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     status = models.CharField(max_length=100, blank=True)
-    profile_photo = models.CharField(max_length=100, blank=True)
+    profile_photo = models.TextField(blank=True)
 
     relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
