@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-# from api.models import PersonManager
 from api.models import UserManager
 
 
@@ -20,7 +19,7 @@ class PUTSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password')
 
 
-class POSTSerializer(serializers.ModelSerializer):
+class WithTokenSerializer(serializers.ModelSerializer):
     token = serializers.SerializerMethodField()
     password = serializers.CharField(write_only=True)
 
@@ -43,7 +42,7 @@ class POSTSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('token', 'username', 'password')
+        fields = ('token', 'id', 'username', 'password')
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -54,6 +53,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 METHODS_SERIALIZERS = {
     'list': GETSerializer,
-    'update': PUTSerializer,
-    'create': POSTSerializer
+    'update': WithTokenSerializer,
+    'create': WithTokenSerializer,
+    'retrieve': GETSerializer
 }

@@ -15,25 +15,32 @@ class SocialUser(models.Model):
                                            related_name='related_to')
 
     def add_relationship(self, person, symmetrical=True):
+        if self == person:
+            return
+
         relationship, created = Relationship.objects.get_or_create(
-            from_person=self,
-            to_person=person)
+            from_user=self,
+            to_user=person)
 
         if symmetrical:
-            person.add_relationship(self, False)
+            back_relationship = person.add_relationship(self, False)
+            return relationship, back_relationship
 
         return relationship
 
     def remove_relationship(self, person, symmetrical=True):
+        if self == person:
+            return
+
         Relationship.objects.filter(
-            from_person=self,
-            to_person=person).delete()
+            from_user=self,
+            to_user=person).delete()
 
         if symmetrical:
             person.remove_relationship(self, False)
 
     def get_friends(self):
-        return self.relationships.filter(following__to_person=self)
+        return self.relationships.filter(following__to_user=self)
 
     def get_followers(self):
         return [relationship.from_user for relationship in self.followers.all()]

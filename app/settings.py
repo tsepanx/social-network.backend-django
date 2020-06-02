@@ -72,7 +72,7 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler',
+    # 'JWT_RESPONSE_PAYLOAD_HANDLER': 'api.utils.my_jwt_response_handler',
 
     # how long the original token is valid for
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
