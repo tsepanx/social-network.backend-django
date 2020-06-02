@@ -3,7 +3,7 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Post, UserProfile, SocialUser, UserManager
+from .models import Post, UserProfile, SocialUser, Person
 from .serializers import user, profile, post, social_user
 from . import utils
 
@@ -83,7 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(response_serializer.data)
 
     def destroy(self, request, *args, **kwargs):
-        UserManager.delete(kwargs.get('pk'))
+        Person.objects.get(pk=kwargs.pop('pk')).delete()
 
         return Response()
 
