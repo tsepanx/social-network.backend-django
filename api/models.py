@@ -66,6 +66,13 @@ class Person(models.Model):
     profile = models.OneToOneField(UserProfile, on_delete=ON_DELETE, related_name=RELATED_NAME)
     social_user = models.OneToOneField(SocialUser, on_delete=ON_DELETE, related_name=RELATED_NAME)
 
+    def delete(self, using=None, keep_parents=False):
+        self.user.delete()
+        self.social_user.delete()
+        self.profile.delete()
+
+        super(Person, self).delete(using=using, keep_parents=keep_parents)
+
     def __str__(self):
         return self.user.__str__()
 
@@ -91,16 +98,6 @@ class UserManager(models.Manager):
         )
 
         return user
-
-    @staticmethod
-    def delete(pk):
-        to_delete = Person.objects.get(pk=pk)
-
-        to_delete.user.delete()
-        to_delete.social_user.delete()
-        to_delete.profile.delete()
-
-        Person.delete(to_delete)
 
 
 class Post(models.Model):
