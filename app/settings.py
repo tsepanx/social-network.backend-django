@@ -67,7 +67,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
 
-        'api.utils.ExampleAuthentication'
+        # 'api.utils.ExampleAuthentication'
     ),
 }
 
