@@ -1,47 +1,15 @@
 from django.contrib.auth.models import User
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Post, UserProfile, SocialUser, Person
+
 from .serializers import user, profile, post, social_user
-from . import utils
-
-DEFAULT_PERMISSION = permissions.IsAuthenticatedOrReadOnly()
-
-ALLOW_ANY = permissions.AllowAny()
-IS_ADMIN = utils.IsAdmin()
-NOBODY = utils.Nobody()
-
-
-class ModelAuthenticated:
-    USER = utils.user_auth(None)
-    PROFILE = utils.user_auth('person__user')
-    POST = utils.user_auth('author__person__user')
-
-
-USER_METHODS_PERMISSIONS = {
-    'create': [ALLOW_ANY],
-    'update': [ModelAuthenticated.USER],
-    'retrieve': [ModelAuthenticated.USER],
-    'destroy': [permissions.OR(ModelAuthenticated.USER, IS_ADMIN)]
-}
-
-PROFILE_METHODS_PERMISSIONS = {
-    'create': [NOBODY],
-    'update': [ModelAuthenticated.PROFILE]
-}
-
-POST_METHODS_PERMISSIONS = {
-    'create': [ModelAuthenticated.POST],
-    'update': [ModelAuthenticated.POST],
-}
-
-
-def get_permissions_by_map(mapping, action):
-    res = mapping.get(action, [DEFAULT_PERMISSION])
-
-    return res
+from .permissions import viewset_permissions, \
+    USER_METHODS_PERMISSIONS, \
+    PROFILE_METHODS_PERMISSIONS, \
+    POST_METHODS_PERMISSIONS
 
 
 def get_serializer_by_map(mapping, action):
@@ -55,7 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = user.GETSerializer
 
     def get_permissions(self):
-        return get_permissions_by_map(USER_METHODS_PERMISSIONS, self.action)
+        return viewset_permissions(self, USER_METHODS_PERMISSIONS)
 
     def get_serializer_class(self):
         return get_serializer_by_map(user.METHODS_SERIALIZERS, self.action)
@@ -96,7 +64,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return get_serializer_by_map(profile.METHOD_SERIALIZERS, self.action)
 
     def get_permissions(self):
-        return get_permissions_by_map(PROFILE_METHODS_PERMISSIONS, self.action)
+        return viewset_permissions(self, PROFILE_METHODS_PERMISSIONS)
 
 
 class SocialUserViewSet(viewsets.ModelViewSet):
@@ -111,7 +79,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = post.PostSerializer
 
     def get_permissions(self):
-        return get_permissions_by_map(POST_METHODS_PERMISSIONS, self.action)
+        return viewset_permissions(self, POST_METHODS_PERMISSIONS)
 
     def get_queryset(self):
         profile_id = self.request.query_params.get('user', None)
