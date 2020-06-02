@@ -22,6 +22,8 @@ class ModelAuthenticated:
 
 USER_METHODS_PERMISSIONS = {
     'create': [ALLOW_ANY],
+    'update': [ModelAuthenticated.USER],
+    'retrieve': [ModelAuthenticated.USER],
     'destroy': [permissions.OR(ModelAuthenticated.USER, IS_ADMIN)]
 }
 
@@ -59,33 +61,31 @@ class UserViewSet(viewsets.ModelViewSet):
         return get_serializer_by_map(user.METHODS_SERIALIZERS, self.action)
 
     def update(self, request, *args, **kwargs):
-        user_id = kwargs.pop('pk', None)
-
         username = request.data.get('username', None)
         password = request.data.get('password', None)
 
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=False)
+        if username and password:
+            serializer = self.get_serializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=False)
 
-        if user_id:
-            db_user = User.objects.get(pk=user_id)
+            instance.username = username
+            instance.set_password(password)
+        elif username:
+            instance.username = username
+        elif password:
+            instance.set_password(password)
 
-            if password:
-                db_user.set_password(password)
-            if username:
-                db_user.username = username
+        instance.save()
 
-            db_user.save()
-
-        return Response(serializer.data)
+        response_serializer = self.get_serializer(instance)
+        return Response(response_serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         UserManager.delete(kwargs.get('pk'))
 
         return Response()
-
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -101,7 +101,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 class SocialUserViewSet(viewsets.ModelViewSet):
     queryset = SocialUser.objects.all()
-    serializer_class = social_user.SocialUserSerializer
+
+    def get_serializer_class(self):
+        return get_serializer_by_map(social_user.METHODS_SERIALIZERS, self.action)
 
 
 class PostViewSet(viewsets.ModelViewSet):

@@ -1,14 +1,5 @@
 from rest_framework import permissions, authentication
 
-from . import serializers
-
-
-def my_jwt_response_handler(token, user=None, request=None):
-    return {
-        'token': token,
-        'user': serializers.user.GETSerializer(user, context={'request': request}).data
-    }
-
 
 class Nobody(permissions.BasePermission):
     def has_permission(self, request, view):

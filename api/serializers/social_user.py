@@ -6,7 +6,7 @@ from api.models import SocialUser
 class SocialUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialUser
-        fields = '__all__'
+        fields = ('id', 'relationships')
 
 
 METHODS_SERIALIZERS = {
