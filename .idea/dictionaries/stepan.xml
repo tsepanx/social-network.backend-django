@@ -2,6 +2,7 @@
   <dictionary name="stepan">
     <words>
       <w>corsheaders</w>
+      <w>viewset</w>
     </words>
   </dictionary>
 </component>
