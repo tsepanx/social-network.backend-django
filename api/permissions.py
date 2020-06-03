@@ -52,6 +52,11 @@ USER_OR_ADMIN = permissions.OR(
     IS_ADMIN
 )
 
+SOCIAL_OR_ADMIN = permissions.OR(
+    ModelAuthenticated.SOCIAL,
+    IS_ADMIN
+)
+
 USER_METHODS_PERMISSIONS = {
     'create': [ALLOW_ANY],
     'retrieve': [USER_OR_ADMIN],
@@ -68,8 +73,8 @@ PROFILE_METHODS_PERMISSIONS = {
 SOCIAL_USER_METHODS_PERMISSIONS = {
     'create': [NOBODY],
     'update': [NOBODY],
-    'partial_update': [ModelAuthenticated.SOCIAL],
-    'destroy': [NOBODY],
+    'partial_update': [SOCIAL_OR_ADMIN],
+    'destroy': [SOCIAL_OR_ADMIN],
 }
 
 POST_METHODS_PERMISSIONS = {

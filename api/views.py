@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Post, UserProfile, SocialUser, Person, Relationship
+from .models import Post, UserProfile, SocialUser, Person
 
 from .serializers import user, profile, post, social_user
 from .permissions import viewset_permissions, \
@@ -77,15 +77,26 @@ class SocialUserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         return viewset_permissions(self, SOCIAL_USER_METHODS_PERMISSIONS)
 
-    def update(self, request, *args, **kwargs):
+    def handle_relationship(self, request, *args, **kwargs):
         from_id = kwargs.get('pk', None)
         to_id = request.query_params.get('to', None)
+
+        symmetrical = request.query_params.get('symmetrical', False)
 
         if to_id:
             from_social_user = SocialUser.objects.get(id=from_id)
             to_social_user = SocialUser.objects.get(id=to_id)
 
-            return from_social_user.add_relationship(to_social_user)
+            if self.action == 'partial_update':
+                from_social_user.add_relationship(to_social_user, symmetrical)
+            elif self.action == 'destroy':
+                from_social_user.remove_relationship(to_social_user, symmetrical)
+
+    def update(self, request, *args, **kwargs):
+        return self.handle_relationship(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        return self.handle_relationship(request, *args, **kwargs)
 
 
 class PostViewSet(viewsets.ModelViewSet):
