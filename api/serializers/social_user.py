@@ -1,28 +1,27 @@
 from rest_framework import serializers
 
 from api.models import SocialUser
-from .profile import ProfileSerializer
+from . import profile
 
 
 class SocialUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialUser
-        fields = ('id', 'relationships')
+        exclude = ()
 
 
-class GETSerializer(serializers.ModelSerializer):
+class RetrieveSerializer(SocialUserSerializer):
     users = serializers.SerializerMethodField()
 
     def get_users(self, obj):
         for social_user in obj.relationships.all():
-            yield ProfileSerializer(social_user.person.profile).data
+            yield profile.WithUsernameSerializer(social_user.person.profile).data
 
-    class Meta:
-        model = SocialUser
-        fields = ('id', 'users')
+    class Meta(SocialUserSerializer.Meta):
+        exclude = ('relationships',)
 
 
 METHODS_SERIALIZERS = {
     'list': SocialUserSerializer,
-    'retrieve': GETSerializer
+    'retrieve': RetrieveSerializer
 }
