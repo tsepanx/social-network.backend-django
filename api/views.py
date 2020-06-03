@@ -3,13 +3,14 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Post, UserProfile, SocialUser, Person
+from .models import Post, UserProfile, SocialUser, Person, Relationship
 
 from .serializers import user, profile, post, social_user
 from .permissions import viewset_permissions, \
     USER_METHODS_PERMISSIONS, \
     PROFILE_METHODS_PERMISSIONS, \
-    POST_METHODS_PERMISSIONS
+    POST_METHODS_PERMISSIONS, \
+    SOCIAL_USER_METHODS_PERMISSIONS
 
 
 def get_serializer_by_map(mapping, action):
@@ -28,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return get_serializer_by_map(user.METHODS_SERIALIZERS, self.action)
 
-    def update(self, request, *args, **kwargs):
+    def partial_update(self, request, *args, **kwargs):
         username = request.data.get('username', None)
         password = request.data.get('password', None)
 
@@ -72,6 +73,19 @@ class SocialUserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return get_serializer_by_map(social_user.METHODS_SERIALIZERS, self.action)
+
+    def get_permissions(self):
+        return viewset_permissions(self, SOCIAL_USER_METHODS_PERMISSIONS)
+
+    def update(self, request, *args, **kwargs):
+        from_id = kwargs.get('pk', None)
+        to_id = request.query_params.get('to', None)
+
+        if to_id:
+            from_social_user = SocialUser.objects.get(id=from_id)
+            to_social_user = SocialUser.objects.get(id=to_id)
+
+            return from_social_user.add_relationship(to_social_user)
 
 
 class PostViewSet(viewsets.ModelViewSet):
