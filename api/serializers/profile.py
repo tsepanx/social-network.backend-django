@@ -21,6 +21,7 @@ class WithUsernameSerializer(ProfileSerializer):
         return obj.person.user.username
 
 
+<<<<<<< HEAD
 class WithPostsUsernameSerializer(WithPostsSerializer, WithUsernameSerializer):
     pass
 
@@ -28,5 +29,10 @@ class WithPostsUsernameSerializer(WithPostsSerializer, WithUsernameSerializer):
 METHOD_SERIALIZERS = {
     'list': ProfileSerializer,
     'retrieve': WithPostsUsernameSerializer,
+=======
+METHOD_SERIALIZERS = {
+    'list': ProfileSerializer,
+    'retrieve': WithPostsSerializer,
+>>>>>>> 0541289 (Serializers inheritance)
     'update': ProfileSerializer
 }
