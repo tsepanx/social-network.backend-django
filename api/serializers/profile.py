@@ -1,23 +1,32 @@
 from rest_framework import serializers
 
 from api.models import UserProfile
-from . import user, post
+from . import post
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = user.UserProfileSerializer(read_only=True)
-
     class Meta:
         model = UserProfile
-        exclude = ()  # ('id',)
+        exclude = ()
 
 
-class ProfileWithPostsSerializer(ProfileSerializer):
+class WithPostsSerializer(ProfileSerializer):
     posts = post.PostSerializer(many=True)
+
+
+class WithUsernameSerializer(ProfileSerializer):
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        return obj.person.user.username
+
+
+class WithPostsUsernameSerializer(WithPostsSerializer, WithUsernameSerializer):
+    pass
 
 
 METHOD_SERIALIZERS = {
     'list': ProfileSerializer,
-    'retrieve': ProfileWithPostsSerializer,
+    'retrieve': WithPostsUsernameSerializer,
     'update': ProfileSerializer
 }
