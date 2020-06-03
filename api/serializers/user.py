@@ -53,7 +53,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 METHODS_SERIALIZERS = {
     'list': GETSerializer,
-    'update': WithTokenSerializer,
+    'partial_update': WithTokenSerializer,
     'create': WithTokenSerializer,
     'retrieve': GETSerializer
 }

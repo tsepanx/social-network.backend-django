@@ -1,3 +1,5 @@
+import collections
+
 from rest_framework import permissions
 
 
@@ -11,18 +13,17 @@ class MyIsAdmin(permissions.IsAdminUser):
         return super().has_permission(request, view)
 
 
-def user_auth(user_field=None):
+def user_auth(*fields):
     class ModelPermission(permissions.BasePermission):
         def has_permission(self, request, view):
             return True
 
         def has_object_permission(self, request, view, obj):
-            if user_field == 'person__user':  # TODO doesn't work with that field, set it manually
-                owner = obj.person.user
-            elif user_field:
-                owner = obj.__getattribute__(user_field)
-            else:
-                owner = obj
+            owner = obj
+
+            if isinstance(fields, collections.Iterable) and fields:
+                for f in fields:
+                    owner = getattr(owner, f)
 
             if not request.user:
                 return False
@@ -34,9 +35,10 @@ def user_auth(user_field=None):
 
 
 class ModelAuthenticated:
-    USER = user_auth(None)
-    PROFILE = user_auth('person__user')
-    POST = user_auth('author__person__user')
+    USER = user_auth()
+    PROFILE = user_auth('person', 'user')
+    POST = user_auth('author', 'person', 'user')
+    SOCIAL = user_auth('person', 'user')
 
 
 DEFAULT_PERMISSION = permissions.IsAuthenticatedOrReadOnly()
@@ -52,14 +54,22 @@ USER_OR_ADMIN = permissions.OR(
 
 USER_METHODS_PERMISSIONS = {
     'create': [ALLOW_ANY],
-    'update': [USER_OR_ADMIN],
     'retrieve': [USER_OR_ADMIN],
+    'update': [NOBODY],
+    'partial_update': [USER_OR_ADMIN],
     'destroy': [USER_OR_ADMIN]
 }
 
 PROFILE_METHODS_PERMISSIONS = {
     'create': [NOBODY],
     'update': [ModelAuthenticated.PROFILE]
+}
+
+SOCIAL_USER_METHODS_PERMISSIONS = {
+    'create': [NOBODY],
+    'update': [NOBODY],
+    'partial_update': [ModelAuthenticated.SOCIAL],
+    'destroy': [NOBODY],
 }
 
 POST_METHODS_PERMISSIONS = {
