@@ -113,12 +113,41 @@ class Post(models.Model):
 
 
 class Chat(models.Model):
-    participants = models.ManyToManyRel('self', Person, related_name='chats')
+    participants = models.ManyToManyField(Person, related_name='chats')
+
+    def is_participant(self, person):
+        return person in self.participants.all()
+
+    def add_participant(self, person):
+        return self.participants.add(person)
+
+    def remove_participant(self, person):
+        if self.is_participant(person):
+            self.participants.remove(person)
+        else:
+            raise Exception("User doesn't exist")
+
+    def send_message(self, from_person: Person, text):
+        if self.is_participant(from_person):
+            msg = Message.objects.create(
+                sender=from_person,
+                chat=self,
+                text=text
+            )
+
+            return msg
+        raise Exception('User not in chat')
+
+    def __str__(self):
+        return f'Messages: {len(self.messages.all())}'
 
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, models.CASCADE, related_name='messages', default=None)
-
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages', default=None)
     sender = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='sent_messages')
-    text = models.TextField(verbose_name='Message text')
+
+    text = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.sender}: {self.text}'
