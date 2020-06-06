@@ -79,7 +79,9 @@ SOCIAL_USER_METHODS_PERMISSIONS = {
 
 POST_METHODS_PERMISSIONS = {
     'create': [ModelAuthenticated.POST],
+    'retrieve': [NOBODY],
     'update': [ModelAuthenticated.POST],
+    'delete': [ModelAuthenticated.POST]
 }
 
 

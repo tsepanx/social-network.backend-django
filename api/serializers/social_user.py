@@ -11,9 +11,9 @@ class SocialUserSerializer(serializers.ModelSerializer):
 
 
 class RetrieveSerializer(SocialUserSerializer):
-    list = serializers.SerializerMethodField()
+    friends = serializers.SerializerMethodField()
 
-    def get_list(self, obj):
+    def get_friends(self, obj):
         for social_user in obj.relationships.all():
             yield profile.WithUsernameSerializer(social_user.person.profile).data
 

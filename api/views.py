@@ -19,15 +19,20 @@ def get_serializer_by_map(mapping, action):
     return mapping.get(action, default_serializer)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+def my_viewset(permissions_mapping, serializers_mapping):
+    class MyViewSet(viewsets.ModelViewSet):
+        def get_permissions(self):
+            return viewset_permissions(self, permissions_mapping)
+
+        def get_serializer_class(self):
+            return get_serializer_by_map(serializers_mapping, self.action)
+
+    return MyViewSet
+
+
+class UserViewSet(my_viewset(USER_METHODS_PERMISSIONS, user.METHODS_SERIALIZERS)):
     queryset = User.objects.all()
     serializer_class = user.GETSerializer
-
-    def get_permissions(self):
-        return viewset_permissions(self, USER_METHODS_PERMISSIONS)
-
-    def get_serializer_class(self):
-        return get_serializer_by_map(user.METHODS_SERIALIZERS, self.action)
 
     def partial_update(self, request, *args, **kwargs):
         username = request.data.get('username', None)
@@ -57,25 +62,12 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response()
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileViewSet(my_viewset(PROFILE_METHODS_PERMISSIONS, profile.METHOD_SERIALIZERS)):
     queryset = UserProfile.objects.all()
-    serializer_class = profile.ProfileSerializer
-
-    def get_serializer_class(self):
-        return get_serializer_by_map(profile.METHOD_SERIALIZERS, self.action)
-
-    def get_permissions(self):
-        return viewset_permissions(self, PROFILE_METHODS_PERMISSIONS)
 
 
-class SocialUserViewSet(viewsets.ModelViewSet):
+class SocialUserViewSet(my_viewset(SOCIAL_USER_METHODS_PERMISSIONS, social_user.METHODS_SERIALIZERS)):
     queryset = SocialUser.objects.all()
-
-    def get_serializer_class(self):
-        return get_serializer_by_map(social_user.METHODS_SERIALIZERS, self.action)
-
-    def get_permissions(self):
-        return viewset_permissions(self, SOCIAL_USER_METHODS_PERMISSIONS)
 
     def handle_relationship(self, request, *args, **kwargs):
         from_id = kwargs.get('pk', None)
@@ -99,20 +91,15 @@ class SocialUserViewSet(viewsets.ModelViewSet):
         return self.handle_relationship(request, *args, **kwargs)
 
 
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('author_id')
-    serializer_class = post.PostSerializer
-
-    def get_permissions(self):
-        return viewset_permissions(self, POST_METHODS_PERMISSIONS)
+class PostViewSet(my_viewset(POST_METHODS_PERMISSIONS, post.METHODS_SERIALIZERS)):
+    queryset = Post.objects.all().order_by('-pub_date')
 
     def get_queryset(self):
         profile_id = self.request.query_params.get('user', None)
 
         if profile_id is not None:
-            return self.queryset.filter(author_id=profile_id).order_by('-pub_date')
-
-        return self.queryset
+            return self.queryset.filter(author_id=profile_id)
+        return super().get_queryset()
 
 
 class Me(APIView):
