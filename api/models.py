@@ -112,9 +112,13 @@ class Post(models.Model):
         return f'{self.title}, @{self.author}'
 
 
-class Message(models.Model):
-    sender = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='messages_sent')
-    receiver = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING, related_name='messages_received')
+class Chat(models.Model):
+    participants = models.ManyToManyRel('self', Person, related_name='chats')
 
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, models.CASCADE, related_name='messages', default=None)
+
+    sender = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='sent_messages')
     text = models.TextField(verbose_name='Message text')
     created = models.DateTimeField(auto_now_add=True)
