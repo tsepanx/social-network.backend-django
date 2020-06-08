@@ -2,7 +2,16 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class Person(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.__str__()
+
+
 class UserProfile(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='profile', null=True)
+
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.TextField(blank=True)
 
@@ -11,6 +20,8 @@ class UserProfile(models.Model):
 
 
 class SocialUser(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='social_user', null=True)
+
     relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
 
@@ -57,26 +68,6 @@ class Relationship(models.Model):
         return f'|{self.from_user.person}| -> |{self.to_user.person}|'
 
 
-class Person(models.Model):
-    RELATED_NAME = 'person'
-    ON_DELETE = models.PROTECT
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    profile = models.OneToOneField(UserProfile, on_delete=ON_DELETE, related_name=RELATED_NAME)
-    social_user = models.OneToOneField(SocialUser, on_delete=ON_DELETE, related_name=RELATED_NAME)
-
-    def delete(self, using=None, keep_parents=False):
-        self.user.delete()
-        self.social_user.delete()
-        self.profile.delete()
-
-        super(Person, self).delete(using=using, keep_parents=keep_parents)
-
-    def __str__(self):
-        return self.user.__str__()
-
-
 class UserManager(models.Manager):
     @staticmethod
     def create(username, password):
@@ -87,15 +78,18 @@ class UserManager(models.Manager):
 
         user.save()
 
-        user_profile = UserProfile.objects.create(id=user.id)
-        social_user = SocialUser.objects.create(id=user.id)
-
-        Person.objects.create(
+        person = Person.objects.create(
             id=user.id,
             user=user,
-            profile=user_profile,
-            social_user=social_user
         )
+
+        params = {
+            'id': user.id,
+            'person': person
+        }
+
+        UserProfile.objects.create(**params)
+        SocialUser.objects.create(**params)
 
         return user
 
