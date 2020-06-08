@@ -10,7 +10,7 @@ class Person(models.Model):
 
 
 class UserProfile(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='profile', null=True)
+    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='profile', null=True)
 
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.TextField(blank=True)
@@ -20,7 +20,7 @@ class UserProfile(models.Model):
 
 
 class SocialUser(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='social_user', null=True)
+    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='social_user', null=True)
 
     relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
