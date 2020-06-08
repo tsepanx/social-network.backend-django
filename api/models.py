@@ -2,6 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+def person_field(related_name):
+    return models.OneToOneField(Person, on_delete=models.CASCADE, related_name=related_name, null=True)
+
+
 class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -10,7 +14,7 @@ class Person(models.Model):
 
 
 class UserProfile(models.Model):
-    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='profile', null=True)
+    person = person_field('profile')
 
     status = models.CharField(max_length=100, blank=True)
     profile_photo = models.TextField(blank=True)
@@ -20,7 +24,7 @@ class UserProfile(models.Model):
 
 
 class SocialUser(models.Model):
-    person = models.OneToOneField(Person, on_delete=models.CASCADE, related_name='social_user', null=True)
+    person = person_field('social_user')
 
     relationships = models.ManyToManyField('self', through='Relationship',
                                            related_name='related_to')
